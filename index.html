@@ -90,11 +90,19 @@
                     <p class="text-gray-700">This page provides two JavaScript snippets designed to be run in your web browser's developer console. Each script is tailored to extract and clean image links from a specific type of webpage, and then copies the resulting links to your clipboard for easy use.</p>
 
                     <h2 class="text-2xl font-semibold text-gray-800 pt-4 border-t">How It Works</h2>
+                    <p class="text-gray-700">The scripts differ in how they target the images on a webpage:</p>
+                    <h3 class="text-xl font-semibold text-gray-800">Script 1: For Product Thumbnails</h3>
                     <ol class="list-decimal list-inside space-y-3 text-gray-700">
-                        <li><strong>Selects Image Elements:</strong> It targets `<img>` tags on the webpage that have specific CSS classes (`pdp-mod-common-image` and `item-gallery__thumbnail-image`) to focus only on relevant product gallery images.</li>
-                        <li><strong>Extracts and Cleans Links:</strong> For each image, it grabs the `src` URL and removes a specific substring (`_120x120q80.jpg_.webp`) to get a link to the original, higher-resolution image.</li>
-                        <li><strong>Logs to Console:</strong> All cleaned links are printed to the browser's console for review.</li>
-                        <li><strong>Copies to Clipboard:</strong> The script automatically copies the list of cleaned links to your system's clipboard for easy pasting elsewhere.</li>
+                        <li><strong>Finds Images by Class:</strong> This script searches for all images on the page that have specific, hard-coded CSS class attributes (e.g., `pdp-mod-common-image`).</li>
+                        <li><strong>Cleans a Specific Substring:</strong> It then looks for a fixed part of the image URL, like `_120x120q80.jpg_.webp`, and removes it to give you a link to the main, higher-quality image.</li>
+                        <li><strong>Logs and Copies:</strong> All the cleaned links are logged to the console and automatically copied to your clipboard.</li>
+                    </ol>
+
+                    <h3 class="text-xl font-semibold text-gray-800 pt-4 border-t">Script 2: For Product Details</h3>
+                    <ol class="list-decimal list-inside space-y-3 text-gray-700">
+                        <li><strong>Finds Images by Container:</strong> This more dynamic script first locates a specific section of the webpage using the CSS ID `#module_product_detail` to focus on the product image gallery.</li>
+                        <li><strong>Uses a Dynamic Regex:</strong> It then uses a regular expression to intelligently remove the size and quality parameters (e.g., `_2200x2200q80.jpg_.webp`) from the URL. This makes it adaptable to different image sizes and file extensions like `.jpg` or `.png`.</li>
+                        <li><strong>Logs and Copies:</strong> All the cleaned links are logged to the console and automatically copied to your clipboard.</li>
                     </ol>
                 </section>
 
@@ -116,6 +124,9 @@
                         </li>
                         <li>
                             <strong>Run the Script:</strong> Press `Enter`. The script will execute, showing logs in the console.
+                        </li>
+                        <li>
+                            <strong>Download Images:</strong> Open IDM. Click "Task" on the top left corner. Select "Add batch download from clipboard". Click "Check all". Select "Main Donload Queue" and clik "Ok". Lastly click on "Start the queue" button and all images will be downloded.
                         </li>
                     </ol>
                     <div class="alert-box mt-6">
@@ -295,8 +306,6 @@ if (container) {
                     const codeSnippetElement = document.getElementById(targetId);
 
                     if (codeSnippetElement) {
-                        // Use textContent instead of innerText for a more accurate copy of the code,
-                        // which avoids the syntax error you were seeing.
                         const codeText = codeSnippetElement.textContent;
 
                         const tempTextArea = document.createElement('textarea');
