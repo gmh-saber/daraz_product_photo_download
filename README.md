@@ -1,1 +1,165 @@
-Image Link Extractor Scripts This repository contains two JavaScript snippets designed to be run in your web browser's developer console. These scripts are useful for quickly extracting and cleaning image links from specific types of webpages, and then copying the list of links to your clipboard. Table of Contents Overview How It Works Usage Guide The Scripts Overview This tool provides two JavaScript snippets tailored to different webpage structures. Each script is designed to extract and clean image links from a specific page layout, making it easy to grab high-resolution image URLs and copy them for other uses, such as batch downloading with a tool like IDM. How It Works The scripts differ in how they locate and process images on a webpage. Script 1: For Product Thumbnails Finds Images by Class: This script targets all images on the page that have specific, hard-coded CSS class attributes (e.g., .pdp-mod-common-image). Cleans a Specific Substring: It looks for and removes a fixed part of the image URL, such as \_120x120q80.jpg\_.webp, to get a link to the main, higher-quality image. Logs and Copies: The cleaned links are printed to the browser's console and automatically copied to your clipboard. Script 2: For Product Details Finds Images by Container: This more dynamic script first locates a specific section of the webpage using its CSS ID (#module\_product\_detail). Uses a Dynamic Regex: It uses a regular expression to intelligently remove the size and quality parameters (e.g., \_2200x2200q80.jpg\_.webp) from the URL. This makes it adaptable to different image sizes and file extensions like .jpg or .png. Logs and Copies: The cleaned links are printed to the console and automatically copied to your clipboard. Usage Guide Follow these steps to use either script in your browser's developer console: Navigate to the Webpage: Go to the page where you want to extract the image links. Open Developer Tools: Right-click anywhere on the page and select "Inspect." Then, navigate to the Console tab. Copy & Paste the Code: Find the script you need below, copy the entire code block, and paste it into the console's input area. Run the Script: Press Enter to execute the script. The cleaned links will be displayed in the console and automatically copied to your clipboard. Download Images (with IDM): Open IDM (Internet Download Manager). Click "Task" on the top-left corner and select "Add batch download from clipboard". In the window that appears, click "Check all," select "Main Download Queue," and click "Ok." Finally, click the "Start the queue" button to download all the images. Note on Functionality: This script only extracts and copies links. It cannot automatically download images due to browser security restrictions. User interaction is required for each download. The Scripts Script 1: For Product Thumbnails This script is for pages where the image elements have hard-coded class attributes. // This script targets image elements on the currently loaded webpage with specific class attributes. // Select all img tags with specific classes for product thumbnails. const imgElements = document.querySelectorAll('img.pdp-mod-common-image.item-gallery\_\_thumbnail-image'); const cleanedSrcLinks = \[\]; // Iterate over each img element to extract and clean its src attribute. imgElements.forEach(img => { let src = img.getAttribute('src'); if (src) { // Define the specific substring to remove from the image URL. const substringToRemove = "\_120x120q80.jpg\_.webp"; // Replace the substring if it exists to get the main image link. if (src.includes(substringToRemove)) { src = src.replace(substringToRemove, ""); } cleanedSrcLinks.push(src); } }); // Log the cleaned links to the console for verification. console.log("Cleaned Image Source Links from Current Page:"); if (cleanedSrcLinks.length > 0) { cleanedSrcLinks.forEach(link => console.log(link)); // --- Feature: Copy links to clipboard --- const linksToCopy = cleanedSrcLinks.join('\\n'); const tempTextArea = document.createElement('textarea'); tempTextArea.value = linksToCopy; tempTextArea.style.position = 'fixed'; tempTextArea.style.left = '-9999px'; document.body.appendChild(tempTextArea); tempTextArea.focus(); tempTextArea.select(); try { const successful = document.execCommand('copy'); const msg = successful ? 'successfully' : 'unsuccessfully'; console.log(\`Links copied to clipboard ${msg}!\`); } catch (err) { console.error('Oops, unable to copy links to clipboard:', err); console.log('You can manually copy the links from the console output above.'); } finally { document.body.removeChild(tempTextArea); } } else { console.log("No matching image links found with the specified pattern."); } Script 2: For Product Details This script is more dynamic and works on pages where the images are contained within a specific element, regardless of their individual class attributes. // This script is now dynamic, allowing you to specify the container for the images. // This makes it adaptable to different pages on the same website with similar structures. // The CSS selector for the image container is now hard-coded to 'module\_product\_detail'. // This removes the need for a user prompt. const selector = '#module\_product\_detail'; // Select the main container for the product description using the provided selector. const container = document.querySelector(selector); if (container) { // Find all  tags within the container. const imgElements = container.querySelectorAll('img'); const cleanedSrcLinks = \[\]; // Define a regular expression to find and remove the dynamic part of the URL, // like "\_2200x2200q80.jpg\_.webp" or similar variations. // The regex is now updated to handle both .jpg and .png file extensions. const regexToRemove = /\_\\d+x\\d+q\\d+\\.(jpg|png)\_\\.webp/g; // Iterate over each img element to extract and clean its src attribute. imgElements.forEach(img => { let src = img.getAttribute('src'); if (src) { // Use the regular expression to replace the matched substring with an empty string. // This makes the script dynamic and adaptable to different image sizes/qualities. const cleanedSrc = src.replace(regexToRemove, ""); cleanedSrcLinks.push(cleanedSrc); } }); // Log the cleaned links to the console for verification. console.log("Cleaned Image Links from Product Details:"); if (cleanedSrcLinks.length > 0) { cleanedSrcLinks.forEach(link => console.log(link)); // --- Feature: Copy links to clipboard --- const linksToCopy = cleanedSrcLinks.join('\\n'); const tempTextArea = document.createElement('textarea'); tempTextArea.value = linksToCopy; tempTextArea.style.position = 'fixed'; tempTextArea.style.left = '-9999px'; document.body.appendChild(tempTextArea); tempTextArea.focus(); tempTextArea.select(); try { const successful = document.execCommand('copy'); const msg = successful ? 'successfully' : 'unsuccessfully'; console.log(\`Links copied to clipboard ${msg}!\`); } catch (err) { console.error('Oops, unable to copy links to clipboard:', err); console.log('You can manually copy the links from the console output above.'); } finally { document.body.removeChild(tempTextArea); } } else { console.log("No matching image links found with the specified pattern."); } } else { console.log(\`Could not find the '${selector}' container on this page.\`); }
+Here's a dynamic `README.md` file for your GitHub repository, styled and structured to reflect the look and feel of your HTML website (using Markdown conventions and GitHub-friendly formatting):
+
+---
+
+````markdown
+# 🖼️ Image Link Extractor Scripts
+
+A guide to using browser console tools for extracting high-quality image URLs from webpages.
+
+---
+
+## 📄 Overview
+
+This project provides **two JavaScript snippets** designed to be run in the **browser's developer console**. Each script targets a different kind of product image structure and helps you extract cleaned image URLs, which are automatically copied to your clipboard.
+
+### 🧠 How It Works
+
+#### 🔹 Script 1: Product Thumbnails
+
+1. **Targets by Class** – Searches for images with the class like `pdp-mod-common-image`.
+2. **Cleans the URL** – Removes suffixes like `_120x120q80.jpg_.webp` to reveal the original.
+3. **Copies to Clipboard** – Outputs cleaned links and copies them for easy use.
+
+#### 🔹 Script 2: Product Details
+
+1. **Targets by Container** – Focuses on the `#module_product_detail` element.
+2. **Uses Regex** – Dynamically removes size/quality params from `.jpg` and `.png` URLs.
+3. **Copies to Clipboard** – Extracted links are cleaned and auto-copied.
+
+---
+
+## 🚀 Usage Guide
+
+### 🧭 Step-by-step
+
+1. **Open the Target Webpage** – Visit the page with the product images.
+2. **Open Developer Tools**  
+   - **Chrome/Firefox/Edge:** Right-click → "Inspect" → Console tab  
+   - **Safari:** Preferences → Advanced → Enable "Show Develop Menu" → Console
+3. **Copy the Script** – Choose the appropriate script below and copy it.
+4. **Paste and Run** – Paste into the console and press `Enter`.
+5. **Download Images**  
+   - Open **Internet Download Manager (IDM)**
+   - Go to `Task > Add batch download from clipboard`
+   - Select all, click OK → Start the queue
+
+> ⚠️ **Note:** These scripts only extract and copy image URLs. They do not auto-download files due to browser restrictions.
+
+---
+
+## 💻 The Code
+
+### 📜 Script 1 – Product Thumbnails
+
+```javascript
+// Extracts thumbnails by class and cleans URL.
+const imgElements = document.querySelectorAll('img.pdp-mod-common-image.item-gallery__thumbnail-image');
+const cleanedSrcLinks = [];
+
+imgElements.forEach(img => {
+    let src = img.getAttribute('src');
+    if (src && src.includes("_120x120q80.jpg_.webp")) {
+        src = src.replace("_120x120q80.jpg_.webp", "");
+        cleanedSrcLinks.push(src);
+    }
+});
+
+console.log("Cleaned Image Source Links:");
+if (cleanedSrcLinks.length > 0) {
+    cleanedSrcLinks.forEach(link => console.log(link));
+    const linksToCopy = cleanedSrcLinks.join('\n');
+    const tempTextArea = document.createElement('textarea');
+    tempTextArea.value = linksToCopy;
+    tempTextArea.style.position = 'fixed';
+    tempTextArea.style.left = '-9999px';
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempTextArea);
+    console.log("Links copied to clipboard!");
+} else {
+    console.log("No matching images found.");
+}
+````
+
+---
+
+### 📜 Script 2 – Product Details (Dynamic)
+
+```javascript
+// Dynamically targets detailed images and cleans URLs.
+const selector = '#module_product_detail';
+const container = document.querySelector(selector);
+
+if (container) {
+    const imgElements = container.querySelectorAll('img');
+    const cleanedSrcLinks = [];
+    const regexToRemove = /_\d+x\d+q\d+\.(jpg|png)_\.webp/g;
+
+    imgElements.forEach(img => {
+        let src = img.getAttribute('src');
+        if (src) {
+            const cleanedSrc = src.replace(regexToRemove, "");
+            cleanedSrcLinks.push(cleanedSrc);
+        }
+    });
+
+    console.log("Cleaned Image Links:");
+    if (cleanedSrcLinks.length > 0) {
+        cleanedSrcLinks.forEach(link => console.log(link));
+        const linksToCopy = cleanedSrcLinks.join('\n');
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = linksToCopy;
+        tempTextArea.style.position = 'fixed';
+        tempTextArea.style.left = '-9999px';
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextArea);
+        console.log("Links copied to clipboard!");
+    } else {
+        console.log("No matching images found.");
+    }
+} else {
+    console.log("Container not found:", selector);
+}
+```
+
+---
+
+## 🔧 Features
+
+* ✅ Extracts high-quality image links
+* ✅ Automatically copies them to your clipboard
+* ✅ Works on both thumbnails and detailed product pages
+* ❌ Does not download images automatically (browser limitation)
+
+---
+
+## 📂 Project Structure
+
+```
+📦 image-link-extractor/
+├── README.md
+├── script1-thumbnail.js
+├── script2-details.js
+└── index.html (optional demo)
+```
+
+---
+
+## 📎 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+> Created with ❤️ using JavaScript + TailwindCSS
+
+```
+
+---
+
+Let me know if you'd like it to include live screenshots, deploy links, or be broken into multiple Markdown files.
+```
