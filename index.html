@@ -67,8 +67,8 @@
     <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
         
         <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Image Link Extractor Script</h1>
-            <p class="mt-2 text-lg text-gray-600">An Interactive Guide to the Browser Console Tool</p>
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Image Link Extractor Scripts</h1>
+            <p class="mt-2 text-lg text-gray-600">A guide to different browser console tools</p>
         </header>
 
         <main class="bg-white rounded-lg shadow-md p-6 sm:p-8">
@@ -94,7 +94,7 @@
 
             <div id="tab-content-container">
                 <section id="overview" class="tab-content space-y-6">
-                    <p class="text-gray-700">This JavaScript snippet is designed to be run directly in your web browser's developer console. It automates the process of extracting image source (`src`) links from a webpage, cleaning them, and copying the cleaned links to your clipboard.</p>
+                    <p class="text-gray-700">This page provides two JavaScript snippets designed to be run in your web browser's developer console. Each script is tailored to extract and clean image links from a specific type of webpage, and then copies the resulting links to your clipboard for easy use.</p>
                     
                     <h2 class="text-2xl font-semibold text-gray-800 pt-4 border-t">How It Works</h2>
                     <ol class="list-decimal list-inside space-y-3 text-gray-700">
@@ -119,7 +119,7 @@
                             </ul>
                         </li>
                         <li>
-                            <strong>Copy & Paste the Code:</strong> Copy the code from "The Code" tab and paste it into the console's input area.
+                            <strong>Copy & Paste the Code:</strong> Go to "The Code" tab, select the script you need, copy it using the "Copy Code" button, and paste it into the console's input area.
                         </li>
                         <li>
                             <strong>Run the Script:</strong> Press `Enter`. The script will execute, showing logs in the console.
@@ -132,10 +132,13 @@
                 </section>
 
                 <section id="code" class="tab-content">
-                    <div class="code-block">
-                        <button id="copy-btn" class="copy-button">Copy Code</button>
-                        <pre><code id="code-snippet" class="language-javascript">
-// This script targets image elements on the currently loaded webpage.
+                    <p class="text-gray-700 mb-6">Below are two versions of the image extractor script, each tailored for a different page structure. Select the one that matches the page you are on.</p>
+                    
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Script 1: For Product Thumbnails</h3>
+                    <div class="code-block mb-8">
+                        <button class="copy-button" data-target="code-snippet-v1">Copy Code</button>
+                        <pre><code id="code-snippet-v1" class="language-javascript">
+// This script targets image elements on the currently loaded webpage with specific class attributes.
 
 // Select all img tags with specific classes for product thumbnails.
 const imgElements = document.querySelectorAll('img.pdp-mod-common-image.item-gallery__thumbnail-image');
@@ -177,15 +180,79 @@ if (cleanedSrcLinks.length > 0) {
         console.log(`Links copied to clipboard ${msg}!`);
     } catch (err) {
         console.error('Oops, unable to copy links to clipboard:', err);
+        console.log('You can manually copy the links from the console output above.');
     } finally {
         document.body.removeChild(tempTextArea);
     }
 
 } else {
-    console.log("No matching image links found on this page.");
+    console.log("No matching image links found with the specified pattern.");
 }
                         </code></pre>
                     </div>
+
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2 mt-8 border-t pt-8">Script 2: For Product Details</h3>
+                    <div class="code-block">
+                        <button class="copy-button" data-target="code-snippet-v2">Copy Code</button>
+                        <pre><code id="code-snippet-v2" class="language-javascript">
+// This script is specifically designed to target and clean image links from the provided HTML structure.
+
+// Select the main container for the product description.
+const container = document.querySelector('.html-content.detail-content');
+
+if (container) {
+    // Find all <img> tags within the container.
+    const imgElements = container.querySelectorAll('img');
+    const cleanedSrcLinks = [];
+
+    // Define the specific substring to remove from the image URLs.
+    const substringToRemove = "_2200x2200q80.jpg_.webp";
+
+    // Iterate over each img element to extract and clean its src attribute.
+    imgElements.forEach(img => {
+        let src = img.getAttribute('src');
+        if (src && src.includes(substringToRemove)) {
+            // Replace the substring to get the main image link.
+            src = src.replace(substringToRemove, "");
+            cleanedSrcLinks.push(src);
+        }
+    });
+
+    // Log the cleaned links to the console for verification.
+    console.log("Cleaned Image Links from Product Details:");
+    if (cleanedSrcLinks.length > 0) {
+        cleanedSrcLinks.forEach(link => console.log(link));
+
+        // --- Feature: Copy links to clipboard ---
+        const linksToCopy = cleanedSrcLinks.join('\n');
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = linksToCopy;
+        tempTextArea.style.position = 'fixed';
+        tempTextArea.style.left = '-9999px';
+        document.body.appendChild(tempTextArea);
+        tempTextArea.focus();
+        tempTextArea.select();
+        try {
+            const successful = document.execCommand('copy');
+            const msg = successful ? 'successfully' : 'unsuccessfully';
+            console.log(`Links copied to clipboard ${msg}!`);
+        } catch (err) {
+            console.error('Oops, unable to copy links to clipboard:', err);
+            console.log('You can manually copy the links from the console output above.');
+        } finally {
+            document.body.removeChild(tempTextArea);
+        }
+
+    } else {
+        console.log("No matching image links found with the specified pattern.");
+    }
+
+} else {
+    console.log("Could not find the '.html-content.detail-content' container on this page.");
+}
+                        </code></pre>
+                    </div>
+
                 </section>
             </div>
         </main>
@@ -195,8 +262,7 @@ if (cleanedSrcLinks.length > 0) {
         document.addEventListener('DOMContentLoaded', function () {
             const tabs = document.querySelectorAll('.tab-btn');
             const tabContents = document.querySelectorAll('.tab-content');
-            const copyBtn = document.getElementById('copy-btn');
-            const codeSnippet = document.getElementById('code-snippet');
+            const copyButtons = document.querySelectorAll('.copy-button');
 
             function switchTab(tab) {
                 tabs.forEach(t => {
@@ -222,23 +288,28 @@ if (cleanedSrcLinks.length > 0) {
                 tab.addEventListener('click', () => switchTab(tab));
             });
 
-            if (copyBtn && codeSnippet) {
+            copyButtons.forEach(copyBtn => {
                 copyBtn.addEventListener('click', () => {
-                    const codeText = codeSnippet.innerText;
+                    const targetId = copyBtn.dataset.target;
+                    const codeSnippet = document.getElementById(targetId);
                     
-                    const tempTextArea = document.createElement('textarea');
-                    tempTextArea.value = codeText;
-                    document.body.appendChild(tempTextArea);
-                    tempTextArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(tempTextArea);
+                    if (codeSnippet) {
+                        const codeText = codeSnippet.innerText;
+                        
+                        const tempTextArea = document.createElement('textarea');
+                        tempTextArea.value = codeText;
+                        document.body.appendChild(tempTextArea);
+                        tempTextArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempTextArea);
 
-                    copyBtn.innerText = 'Copied!';
-                    setTimeout(() => {
-                        copyBtn.innerText = 'Copy Code';
-                    }, 2000);
+                        copyBtn.innerText = 'Copied!';
+                        setTimeout(() => {
+                            copyBtn.innerText = 'Copy Code';
+                        }, 2000);
+                    }
                 });
-            }
+            });
 
             // Set the first tab as active by default
             if (tabs.length > 0) {
