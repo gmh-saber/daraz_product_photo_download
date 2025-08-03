@@ -2,57 +2,161 @@
 
 A guide to different browser console tools
 
-![App Screenshot](https://github.com/gmh-saber/daraz_product_photo_download/raw/main/assets/screencapture.png)
+![App Screenshot](https://github.com/gmh-saber/daraz_product_photo_download/blob/main/screencapture-gmh-saber-github-io-daraz-product-photo-download-2025-08-03-23_33_32.png)
 
-🔗 **Live Demo:** [gmh-saber.github.io/daraz_product_photo_download](https://gmh-saber.github.io/daraz_product_photo_download/)
+🔗 **Web:** [gmh-saber.github.io/daraz_product_photo_download](https://gmh-saber.github.io/daraz_product_photo_download/)
+
+---
 
 ---
 
 ## 📄 Overview
 
-This page provides two JavaScript snippets designed to be run in your web browser's developer console. Each script is tailored to extract and clean image links from a specific type of webpage, and then copies the resulting links to your clipboard for easy use.
+This project provides **two JavaScript snippets** designed to be run in the **browser's developer console**. Each script targets a different kind of product image structure and helps you extract cleaned image URLs, which are automatically copied to your clipboard.
+
+### 🧠 How It Works
+
+#### 🔹 Script 1: Product Thumbnails
+
+1. **Targets by Class** – Searches for images with the class like `pdp-mod-common-image`.
+2. **Cleans the URL** – Removes suffixes like `_120x120q80.jpg_.webp` to reveal the original.
+3. **Copies to Clipboard** – Outputs cleaned links and copies them for easy use.
+
+#### 🔹 Script 2: Product Details
+
+1. **Targets by Container** – Focuses on the `#module_product_detail` element.
+2. **Uses Regex** – Dynamically removes size/quality params from `.jpg` and `.png` URLs.
+3. **Copies to Clipboard** – Extracted links are cleaned and auto-copied.
 
 ---
 
-## 🧠 How It Works
+## 🚀 Usage Guide
 
-### Script 1: For Product Thumbnails
+### 🧭 Step-by-step
 
-1. **Finds Images by Class**  
-   This script searches for all images on the page that have specific, hard-coded CSS class attributes (e.g., `pdp-mod-common-image`).
+1. **Open the Target Webpage** – Visit the page with the product images.
+2. **Open Developer Tools**  
+   - **Chrome/Firefox/Edge:** Right-click → "Inspect" → Console tab  
+   - **Safari:** Preferences → Advanced → Enable "Show Develop Menu" → Console
+3. **Copy the Script** – Choose the appropriate script below and copy it.
+4. **Paste and Run** – Paste into the console and press `Enter`.
+5. **Download Images**  
+   - Open **Internet Download Manager (IDM)**
+   - Go to `Task > Add batch download from clipboard`
+   - Select all, click OK → Start the queue
 
-2. **Cleans a Specific Substring**  
-   It then looks for a fixed part of the image URL, like `_120x120q80.jpg_.webp`, and removes it to give you a link to the main, higher-quality image.
-
-3. **Logs and Copies**  
-   All the cleaned links are logged to the console and automatically copied to your clipboard.
-
----
-
-### Script 2: For Product Details
-
-1. **Finds Images by Container**  
-   This more dynamic script first locates a specific section of the webpage using the CSS ID `#module_product_detail` to focus on the product image gallery.
-
-2. **Uses a Dynamic Regex**  
-   It uses a regular expression to intelligently remove the size and quality parameters (e.g., `_2200x2200q80.jpg_.webp`) from the URL. This makes it adaptable to different image sizes and file extensions like `.jpg` or `.png`.
-
-3. **Logs and Copies**  
-   All the cleaned links are logged to the console and automatically copied to your clipboard.
+> ⚠️ **Note:** These scripts only extract and copy image URLs. They do not auto-download files due to browser restrictions.
 
 ---
 
-## 🚀 Try It Live
+## 💻 The Code
 
-> Click to preview the interactive tabbed version  
-👉 [https://gmh-saber.github.io/daraz_product_photo_download](https://gmh-saber.github.io/daraz_product_photo_download)
+### 📜 Script 1 – Product Thumbnails
+
+```javascript
+// Extracts thumbnails by class and cleans URL.
+const imgElements = document.querySelectorAll('img.pdp-mod-common-image.item-gallery__thumbnail-image');
+const cleanedSrcLinks = [];
+
+imgElements.forEach(img => {
+    let src = img.getAttribute('src');
+    if (src && src.includes("_120x120q80.jpg_.webp")) {
+        src = src.replace("_120x120q80.jpg_.webp", "");
+        cleanedSrcLinks.push(src);
+    }
+});
+
+console.log("Cleaned Image Source Links:");
+if (cleanedSrcLinks.length > 0) {
+    cleanedSrcLinks.forEach(link => console.log(link));
+    const linksToCopy = cleanedSrcLinks.join('\n');
+    const tempTextArea = document.createElement('textarea');
+    tempTextArea.value = linksToCopy;
+    tempTextArea.style.position = 'fixed';
+    tempTextArea.style.left = '-9999px';
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempTextArea);
+    console.log("Links copied to clipboard!");
+} else {
+    console.log("No matching images found.");
+}
+
+````
+
+---
+
+### 📜 Script 2 – Product Details (Dynamic)
+
+```javascript
+// Dynamically targets detailed images and cleans URLs.
+const selector = '#module_product_detail';
+const container = document.querySelector(selector);
+
+if (container) {
+    const imgElements = container.querySelectorAll('img');
+    const cleanedSrcLinks = [];
+    const regexToRemove = /_\d+x\d+q\d+\.(jpg|png)_\.webp/g;
+
+    imgElements.forEach(img => {
+        let src = img.getAttribute('src');
+        if (src) {
+            const cleanedSrc = src.replace(regexToRemove, "");
+            cleanedSrcLinks.push(cleanedSrc);
+        }
+    });
+
+    console.log("Cleaned Image Links:");
+    if (cleanedSrcLinks.length > 0) {
+        cleanedSrcLinks.forEach(link => console.log(link));
+        const linksToCopy = cleanedSrcLinks.join('\n');
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = linksToCopy;
+        tempTextArea.style.position = 'fixed';
+        tempTextArea.style.left = '-9999px';
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextArea);
+        console.log("Links copied to clipboard!");
+    } else {
+        console.log("No matching images found.");
+    }
+} else {
+    console.log("Container not found:", selector);
+}
+```
+
+---
+
+## 🔧 Features
+
+* ✅ Extracts high-quality image links
+* ✅ Automatically copies them to your clipboard
+* ✅ Works on both thumbnails and detailed product pages
+* ❌ Does not download images automatically (browser limitation)
+
+---
+
+## 📂 Project Structure
+
+```
+📦 image-link-extractor/
+├── README.md
+├── script1-thumbnail.js
+├── script2-details.js
+└── index.html (optional demo)
+```
 
 ---
 
 ## 📎 License
 
-Licensed under the [MIT License](LICENSE)
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-> Built with ❤️ using JavaScript & TailwindCSS
+> Created with ❤️ using JavaScript + TailwindCSS
+
+> Let me know if you'd like it to include live screenshots, deploy links, or be broken into multiple Markdown files.
