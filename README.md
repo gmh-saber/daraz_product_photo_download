@@ -54,33 +54,58 @@ This project provides **two JavaScript snippets** designed to be run in the **br
 ### 📜 Script 1 – Product Thumbnails
 
 ```javascript
-// Extracts thumbnails by class and cleans URL.
+// This script targets image elements on the currently loaded webpage with specific class attributes.
+
+// Select all img tags with specific classes for product thumbnails.
 const imgElements = document.querySelectorAll('img.pdp-mod-common-image.item-gallery__thumbnail-image');
+
 const cleanedSrcLinks = [];
 
+// Iterate over each img element to extract and clean its src attribute.
 imgElements.forEach(img => {
     let src = img.getAttribute('src');
-    if (src && src.includes("_120x120q80.jpg_.webp")) {
-        src = src.replace("_120x120q80.jpg_.webp", "");
+    if (src) {
+        // Define a regular expression to match the dynamic substring.
+        // This pattern looks for "_<width>x<height>q<quality>.<format>_.webp"
+        // The (?:...) creates a non-capturing group for the file extension.
+        // It matches .jpg, .jpeg, .png, .gif, .bmp, .svg, .webp (and others if needed)
+        const substringPattern = /_\d+x\d+q\d+\.(?:jpg|jpeg|png|gif|bmp|svg|webp)_.webp/i;
+
+        // Replace the matched pattern if it exists to get the main image link.
+        if (substringPattern.test(src)) {
+            src = src.replace(substringPattern, "");
+        }
         cleanedSrcLinks.push(src);
     }
 });
 
-console.log("Cleaned Image Source Links:");
+// Log the cleaned links to the console for verification.
+console.log("Cleaned Image Source Links from Current Page:");
 if (cleanedSrcLinks.length > 0) {
     cleanedSrcLinks.forEach(link => console.log(link));
+
+    // --- Feature: Copy links to clipboard ---
     const linksToCopy = cleanedSrcLinks.join('\n');
     const tempTextArea = document.createElement('textarea');
-    tempTextArea.value = linksToCopy;
+    tempTextArea.value = linksToopy;
     tempTextArea.style.position = 'fixed';
     tempTextArea.style.left = '-9999px';
     document.body.appendChild(tempTextArea);
+    tempTextArea.focus();
     tempTextArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempTextArea);
-    console.log("Links copied to clipboard!");
+    try {
+        const successful = document.execCommand('copy');
+        const msg = successful ? 'successfully' : 'unsuccessfully';
+        console.log(`Links copied to clipboard ${msg}!`);
+    } catch (err) {
+        console.error('Oops, unable to copy links to clipboard:', err);
+        console.log('You can manually copy the links from the console output above.');
+    } finally {
+        document.body.removeChild(tempTextArea);
+    }
+
 } else {
-    console.log("No matching images found.");
+    console.log("No matching image links found with the specified pattern.");
 }
 
 ````
