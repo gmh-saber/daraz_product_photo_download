@@ -87,7 +87,7 @@ if (cleanedSrcLinks.length > 0) {
     // --- Feature: Copy links to clipboard ---
     const linksToCopy = cleanedSrcLinks.join('\n');
     const tempTextArea = document.createElement('textarea');
-    tempTextArea.value = linksToopy;
+    tempTextArea.value = linksToCopy;
     tempTextArea.style.position = 'fixed';
     tempTextArea.style.left = '-9999px';
     document.body.appendChild(tempTextArea);
