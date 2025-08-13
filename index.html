@@ -197,48 +197,69 @@ if (cleanedSrcLinks.length > 0) {
                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Script 2: For Product Detail Image</h3>
                     <div class="code-block mb-8">
                         <button class="copy-button" data-target="code-snippet-v1">Copy Code</button>
-                        <pre><code id="code-snippet-v1" class="language-javascript">// Dynamically targets detailed images and cleans URLs.
+                        <pre><code id="code-snippet-v1" class="language-javascript">// This script is now dynamic, allowing you to specify the container for the images.
+// This makes it adaptable to different pages on the same website with similar structures.
+
+// The CSS selector for the image container is now hard-coded to 'module_product_detail'.
+// This removes the need for a user prompt.
 const selector = '#module_product_detail';
+
+// Select the main container for the product description using the provided selector.
 const container = document.querySelector(selector);
 
 if (container) {
+    // Find all <img> tags within the container.
     const imgElements = container.querySelectorAll('img');
     const cleanedSrcLinks = [];
+
+    // Define a regular expression to find and remove the dynamic part of the URL,
+    // like "_2200x2200q80.jpg_.webp" or similar variations.
+    // The regex is now updated to handle both .jpg and .png file extensions.
     const regexToRemove = /_\d+x\d+q\d+\.(jpg|png)_\.webp/g;
 
+    // Iterate over each img element to extract and clean its src attribute.
     imgElements.forEach(img => {
         let src = img.getAttribute('src');
         if (src) {
+            // Use the regular expression to replace the matched substring with an empty string.
+            // This makes the script dynamic and adaptable to different image sizes/qualities.
             const cleanedSrc = src.replace(regexToRemove, "");
             cleanedSrcLinks.push(cleanedSrc);
         }
     });
 
-    console.log("Cleaned Image Links:");
+    // Log the cleaned links to the console for verification.
+    console.log("Cleaned Image Links from Product Details:");
     if (cleanedSrcLinks.length > 0) {
         cleanedSrcLinks.forEach(link => console.log(link));
+
+        // --- Feature: Copy links to clipboard ---
         const linksToCopy = cleanedSrcLinks.join('\n');
         const tempTextArea = document.createElement('textarea');
         tempTextArea.value = linksToCopy;
         tempTextArea.style.position = 'fixed';
         tempTextArea.style.left = '-9999px';
         document.body.appendChild(tempTextArea);
+        tempTextArea.focus();
         tempTextArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempTextArea);
-        console.log("Links copied to clipboard!");
-    } else {
-        console.log("No matching images found.");
-    }
-} else {
-    console.log("Container not found:", selector);
-}</div>
-                </section>
-            </div>
-        </main>
-    </div>
+        try {
+            const successful = document.execCommand('copy');
+            const msg = successful ? 'successfully' : 'unsuccessfully';
+            console.log(`Links copied to clipboard ${msg}!`);
+        } catch (err) {
+            console.error('Oops, unable to copy links to clipboard:', err);
+            console.log('You can manually copy the links from the console output above.');
+        } finally {
+            document.body.removeChild(tempTextArea);
+        }
 
-    <script>
+    } else {
+        console.log("No matching image links found with the specified pattern.");
+    }
+
+} else {
+    console.log(`Could not find the '${selector}' container on this page.`);
+}<script>
         document.addEventListener('DOMContentLoaded', function () {
             const tabs = document.querySelectorAll('.tab-btn');
             const tabContents = document.querySelectorAll('.tab-content');
