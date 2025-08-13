@@ -233,25 +233,39 @@ if (container) {
     if (cleanedSrcLinks.length > 0) {
         cleanedSrcLinks.forEach(link => console.log(link));
 
-        // --- Feature: Copy links to clipboard ---
+        // --- Feature: Copy links to clipboard using modern API ---
         const linksToCopy = cleanedSrcLinks.join('\n');
-        const tempTextArea = document.createElement('textarea');
-        tempTextArea.value = linksToCopy;
-        tempTextArea.style.position = 'fixed';
-        tempTextArea.style.left = '-9999px';
-        document.body.appendChild(tempTextArea);
-        tempTextArea.focus();
-        tempTextArea.select();
-        try {
-            const successful = document.execCommand('copy');
-            const msg = successful ? 'successfully' : 'unsuccessfully';
-            console.log(`Links copied to clipboard ${msg}!`);
-        } catch (err) {
-            console.error('Oops, unable to copy links to clipboard:', err);
-            console.log('You can manually copy the links from the console output above.');
-        } finally {
-            document.body.removeChild(tempTextArea);
-        }
+        
+        // Use the modern clipboard API for more reliable copying.
+        // It's wrapped in an async function to handle the promise.
+        const copyToClipboard = async (text) => {
+            try {
+                await navigator.clipboard.writeText(text);
+                console.log('Links successfully copied to clipboard!');
+            } catch (err) {
+                console.error('Failed to copy links to clipboard:', err);
+                // Fallback for older browsers or if permission is denied.
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = text;
+                tempTextArea.style.position = 'fixed';
+                tempTextArea.style.left = '-9999px';
+                document.body.appendChild(tempTextArea);
+                tempTextArea.focus();
+                tempTextArea.select();
+                try {
+                    const successful = document.execCommand('copy');
+                    const msg = successful ? 'successfully' : 'unsuccessfully';
+                    console.log(`Links copied to clipboard ${msg} using fallback!`);
+                } catch (fallbackErr) {
+                    console.error('Oops, unable to copy links to clipboard with fallback:', fallbackErr);
+                    console.log('You can manually copy the links from the console output above.');
+                } finally {
+                    document.body.removeChild(tempTextArea);
+                }
+            }
+        };
+
+        copyToClipboard(linksToCopy);
 
     } else {
         console.log("No matching image links found with the specified pattern.");
@@ -259,7 +273,8 @@ if (container) {
 
 } else {
     console.log(`Could not find the '${selector}' container on this page.`);
-}<script>
+}
+<script>
         document.addEventListener('DOMContentLoaded', function () {
             const tabs = document.querySelectorAll('.tab-btn');
             const tabContents = document.querySelectorAll('.tab-content');
