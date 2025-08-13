@@ -1,177 +1,226 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Script Guide</title>
+    <title>Daraz Image Link Extractor Scripts</title>
+    <!-- Use Tailwind CSS for a modern, responsive design -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .tab-active {
-            background-color: #ffffff;
-            color: #1e3a8a;
-            border-color: #3b82f6;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Lighter background */
         }
-        .tab-inactive {
-            background-color: #f0f3f8;
-            color: #4b5563;
+        .code-container {
+            position: relative;
+            transition: max-height 0.3s ease-in-out;
         }
-        .tab-content {
-            display: none;
-        }
-        .tab-content-active {
-            display: block;
+        .code-container.expanded {
+            max-height: none !important;
         }
         .code-block {
-            background-color: #1f2937;
-            color: #d1d5db;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            overflow-x: auto;
+            max-height: 200px;
+            overflow: hidden;
             position: relative;
+            transition: max-height 0.3s ease-in-out;
+        }
+        .code-block.expanded {
+            max-height: none;
+        }
+        .code-block::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(to top, rgba(17, 24, 39, 1), rgba(17, 24, 39, 0));
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .code-block.expanded::after {
+            opacity: 0;
         }
         .copy-button {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background-color: #4b5563;
-            color: #ffffff;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            border-radius: 0.5rem;
+            background-color: #34d399; /* Emerald green button */
+            color: white;
             border: none;
-            border-radius: 0.375rem;
-            padding: 0.5rem 1rem;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
         .copy-button:hover {
-            background-color: #6b7280;
+            background-color: #10b981; /* Darker green hover */
         }
-        .alert-box {
-            background-color: #fffbeb;
-            border-left: 4px solid #facc15;
-            padding: 1rem;
+        .copied-message {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            color: #10b981; /* Green for success */
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        
+        .tab-button.active-tab {
+            border-bottom-color: #34d399;
+            color: #10b981;
+        }
+        .tab-button.active-tab svg {
+            stroke: #10b981;
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="text-gray-800 antialiased">
 
-    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
-
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Daraz Image Link Extractor Scripts</h1>
-            <p class="mt-2 text-lg text-gray-600">A guide to different browser console tools</p>
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-10 my-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">Daraz Image Link Extractor Scripts</h1>
+            <p class="text-lg md:text-xl text-gray-500">A guide to different browser console tools</p>
         </header>
 
-        <main class="bg-white rounded-lg shadow-md p-6 sm:p-8">
-            <nav class="mb-6 border-b border-gray-200">
-                <ul class="flex flex-wrap -mb-px">
-                    <li class="mr-2">
-                        <button class="tab-btn inline-block p-4 border-b-2 rounded-t-lg font-semibold" data-tab="overview">
-                            <span class="mr-2">📄</span>Overview
-                        </button>
-                    </li>
-                    <li class="mr-2">
-                        <button class="tab-btn inline-block p-4 border-b-2 rounded-t-lg font-semibold" data-tab="usage">
-                            <span class="mr-2">🚀</span>Usage Guide
-                        </button>
-                    </li>
-                    <li class="mr-2">
-                        <button class="tab-btn inline-block p-4 border-b-2 rounded-t-lg font-semibold" data-tab="code">
-                            <span class="mr-2">💻</span>The Code
-                        </button>
-                    </li>
-                </ul>
-            </nav>
+        <!-- Tab Navigation -->
+        <nav class="flex justify-center space-x-2 md:space-x-6 mb-8 border-b border-gray-200">
+            <button id="tab-overview" class="tab-button py-2 px-4 font-medium text-gray-500 hover:text-gray-900 focus:outline-none transition-colors duration-200 flex items-center border-b-2 border-emerald-500 text-gray-900 active-tab" onclick="showTab('overview-section')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span class="ml-2">Overview</span>
+            </button>
+            <button id="tab-usage" class="tab-button py-2 px-4 font-medium text-gray-500 hover:text-gray-900 focus:outline-none transition-colors duration-200 flex items-center" onclick="showTab('usage-guide')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                <span class="ml-2">Usage Guide</span>
+            </button>
+            <button id="tab-code" class="tab-button py-2 px-4 font-medium text-gray-500 hover:text-gray-900 focus:outline-none transition-colors duration-200 flex items-center" onclick="showTab('code-section')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-code"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                <span class="ml-2">The Code</span>
+            </button>
+            <button id="tab-troubleshooting" class="tab-button py-2 px-4 font-medium text-gray-500 hover:text-gray-900 focus:outline-none transition-colors duration-200 flex items-center" onclick="showTab('troubleshooting-section')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wrench"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94-7.94l-3.77 3.77a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0z"/><path d="M21.2 14.8l-3.77 3.77a6 6 0 0 1-7.94-7.94l3.77-3.77a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0l-3.77 3.77a6 6 0 0 0 7.94 7.94l3.77-3.77a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0z"/></svg>
+                <span class="ml-2">Troubleshooting</span>
+            </button>
+        </nav>
 
-            <div id="tab-content-container">
-                <section id="overview" class="tab-content space-y-6">
-                    <p class="text-gray-700">This page provides two JavaScript snippets designed to be run in your web browser's developer console. Each script is tailored to extract and clean image links from a specific type of webpage, and then copies the resulting links to your clipboard for easy use.</p>
+        <!-- Main Content Sections (Tabbed) -->
+        <div id="content-container">
+            
+            <!-- Overview Section -->
+            <section id="overview-section" class="content-section active">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">How It Works</h2>
+                <p class="text-gray-600 mb-4">
+                    This page provides two JavaScript script snippets designed to be run in your web browser's developer console. Each script is tailored to extract and clean image links from a specific type of webpage, and then copies the resulting links to your clipboard for easy use.
+                </p>
+                <p class="text-gray-600 mb-6">
+                    The scripts differ in how they target the images on a webpage:
+                </p>
 
-                    <h2 class="text-2xl font-semibold text-gray-800 pt-4 border-t">How It Works</h2>
-                    <p class="text-gray-700">The scripts differ in how they target the images on a webpage:</p>
-                    <h3 class="text-xl font-semibold text-gray-800">Script 1: For Product Thumbnails</h3>
-                    <ol class="list-decimal list-inside space-y-3 text-gray-700">
-                        <li><strong>Finds Images by Class:</strong> This script searches for all images on the page that have specific, hard-coded CSS class attributes (e.g., `pdp-mod-common-image`).</li>
-                        <li><strong>Cleans a Specific Substring:</strong> It then looks for a fixed part of the image URL, like `_120x120q80.jpg_.webp`, and removes it to give you a link to the main, higher-quality image.</li>
-                        <li><strong>Logs and Copies:</strong> All the cleaned links are logged to the console and automatically copied to your clipboard.</li>
-                    </ol>
-
-                    <h3 class="text-xl font-semibold text-gray-800 pt-4 border-t">Script 2: For Product Details</h3>
-                    <ol class="list-decimal list-inside space-y-3 text-gray-700">
-                        <li><strong>Finds Images by Container:</strong> This more dynamic script first locates a specific section of the webpage using the CSS ID `#module_product_detail` to focus on the product image gallery.</li>
-                        <li><strong>Uses a Dynamic Regex:</strong> It then uses a regular expression to intelligently remove the size and quality parameters (e.g., `_2200x2200q80.jpg_.webp`) from the URL. This makes it adaptable to different image sizes and file extensions like `.jpg` or `.png`.</li>
-                        <li><strong>Logs and Copies:</strong> All the cleaned links are logged to the console and automatically copied to your clipboard.</li>
-                    </ol>
-                </section>
-
-                <section id="usage" class="tab-content space-y-6">
-                    <h2 class="text-2xl font-semibold text-gray-800">How to Use</h2>
-                    <ol class="list-decimal list-inside space-y-4 text-gray-700">
-                        <li>
-                            <strong>Navigate to the Webpage:</strong> Open the webpage from which you want to extract image links in your browser.
-                        </li>
-                        <li>
-                            <strong>Open Developer Tools:</strong>
-                            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                                <li><strong>Chrome/Firefox/Edge:</strong> Right-click anywhere and select "Inspect," then go to the "Console" tab.</li>
-                                <li><strong>Safari:</strong> Enable the Develop menu (`Preferences > Advanced`), then select `Develop > Show JavaScript Console`.</li>
-                            </ul>
-                        </li>
-                        <li>
-                            <strong>Copy & Paste the Code:</strong> Go to "The Code" tab, select the script you need, copy it using the "Copy Code" button, and paste it into the console's input area.
-                        </li>
-                        <li>
-                            <strong>Run the Script:</strong> Press `Enter`. The script will execute, showing logs in the console.
-                        </li>
-                        <li>
-                            <strong>Download Images:</strong> Open IDM. Click "Task" on the top left corner. Select "Add batch download from clipboard". Click "Check all". Select "Main Download Queue" and click "Ok". Lastly click on "Start the queue" button and all images will be downloded.
-                        </li>
-                    </ol>
-                    <div class="alert-box mt-6">
-                        <h3 class="font-bold text-yellow-800">Note on Functionality</h3>
-                        <p class="text-yellow-700 mt-1">This script focuses on extracting and copying image links. It does not automatically download images due to browser security limitations that require user interaction for each download.</p>
+                <div class="space-y-6">
+                    <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">Script 1: For Product Thumbnails</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li><strong>Finds Images by Class:</strong> This script searches for all images on the page that have specific, hard-coded CSS class attributes (e.g., <code class="bg-gray-200 px-1 rounded text-sm text-gray-800">pdp-mod-common-image</code>).</li>
+                            <li><strong>Cleans a Specific Substring:</strong> It then looks for a fixed part of the image URL, like <code class="bg-gray-200 px-1 rounded text-sm text-gray-800">_120x120q80.jpg_.webp</code> and removes it to give you a link to the main, higher-quality image.</li>
+                            <li><strong>Logs and Copies:</strong> All the cleaned links are logged to the console and automatically copied to your clipboard.</li>
+                        </ul>
                     </div>
-                </section>
+                    <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">Script 2: For Product Details</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li><strong>Finds Images by Container:</strong> This more dynamic script first locates a specific section of the webpage using the CSS ID: <code class="bg-gray-200 px-1 rounded text-sm text-gray-800">#module_product_detail</code> to focus on the product image gallery.</li>
+                            <li><strong>Uses a Dynamic Regex:</strong> It then uses a regular expression to intelligently remove the size and quality parameters (e.g., <code class="bg-gray-200 px-1 rounded text-sm text-gray-800">_2200x2200q80.jpg_.webp</code>) from the URL. This makes it adaptable to different image sizes and file extensions like <code class="bg-gray-200 px-1 rounded text-sm text-gray-800">.jpg</code> or <code class="bg-gray-200 px-1 rounded text-sm text-gray-800">.png</code>.</li>
+                            <li><strong>Logs and Copies:</strong> All the cleaned links are logged to the console and automatically copied to your clipboard.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
 
-                <section id="code" class="tab-content">
-                    <p class="text-gray-700 mb-6">Below are two versions of the image extractor script, each tailored for a different page structure. Select the one that matches the page you are on.</p>
-<h3 class="text-xl font-semibold text-gray-800 mb-2">Script 1: For Product Thumbnails</h3>
-                    <div class="code-block mb-8">
-                        <button class="copy-button" data-target="code-snippet-v1">Copy Code</button>
-                        <pre><code id="code-snippet-v1" class="language-javascript">// This script targets image elements on the currently loaded webpage with specific class attributes.
+            <!-- Usage Guide Section -->
+            <section id="usage-guide" class="content-section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">How to Use</h2>
+                <ol class="list-decimal list-inside space-y-4 text-gray-600">
+                    <li><strong>Navigate to the Webpage:</strong> Open the webpage from which you want to extract image links in your browser.</li>
+                    <li><strong>Open Developer Tools:</strong>
+                        <ul class="list-disc list-inside ml-6 space-y-1 text-gray-500">
+                            <li><strong>Chrome/Firefox/Edge:</strong> Right-click anywhere and select "Inspect," then go to the "Console" tab.</li>
+                            <li><strong>Safari:</strong> Enable the Develop menu (Preferences > Advanced), then select "Develop > Show JavaScript Console".</li>
+                        </ul>
+                    </li>
+                    <li><strong>Copy & Paste the Code:</strong> Go to the "The Code" section below, select the script you need, copy it using the "Copy Code" button, and paste it into the console's input area.</li>
+                    <li><strong>Run the Script:</strong> Press <kbd class="px-1 py-0.5 bg-gray-200 rounded text-sm font-semibold text-gray-800">Enter</kbd>. The script will execute, showing logs in the console.</li>
+                    <li><strong>Download Images:</strong> Open IDM. Click "Task" on the top left corner. Select "Add batch download from clipboard". Click "Check all". Select "Main Download Queue" and click "OK". Lastly click on "Start the queue" button and all images will be downloaded.</li>
+                </ol>
+                <div class="mt-6 p-4 rounded-lg bg-orange-50 text-orange-800 border border-orange-200">
+                    <p class="font-bold">Note on Functionality</p>
+                    <p>This script focuses on extracting and copying image links. It does not automatically download images due to browser security limitations that require user interaction for each download.</p>
+                </div>
+            </section>
 
-// Select all img tags with specific classes for product thumbnails.
-const imgElements = document.querySelectorAll('img.pdp-mod-common-image.item-gallery__thumbnail-image');
+            <!-- Code Section -->
+            <section id="code-section" class="content-section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">The Scripts</h2>
+                <p class="text-gray-600 mb-6">Choose the script that best fits the images you want to extract.</p>
+                
+                <!-- Script 1 -->
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Script 1: For Product Thumbnails</h3>
+                <div class="code-container bg-gray-900 text-white rounded-lg overflow-hidden relative shadow-lg mb-8">
+                    <pre id="code-snippet-1" class="p-4 overflow-x-auto text-sm text-gray-200 code-block">
+                        <code>
+// This script targets image elements within the product thumbnail gallery.
+// It is designed to be more resilient by looking for common URL patterns.
+const imgElements = document.querySelectorAll('img[src*="_120x120"]');
 
-const cleanedSrcLinks = [];
+const allLinks = [];
+
+// A more robust regular expression to remove the size and quality parameters from the URL.
+// This handles various image file extensions (jpg, png, gif) and webp format.
+const regexToRemove = /_\d+x\d+q\d+\.(jpg|png|gif|webp)_\.webp/g;
 
 // Iterate over each img element to extract and clean its src attribute.
 imgElements.forEach(img => {
     let src = img.getAttribute('src');
     if (src) {
-        // Define a regular expression to match the dynamic substring.
-        // This pattern looks for "_<width>x<height>q<quality>.<format>_.webp"
-        // The (?:...) creates a non-capturing group for the file extension.
-        // It matches .jpg, .jpeg, .png, .gif, .bmp, .svg, .webp (and others if needed)
-        const substringPattern = /_\d+x\d+q\d+\.(?:jpg|jpeg|png|gif|bmp|svg|webp)_.webp/i;
-
-        // Replace the matched pattern if it exists to get the main image link.
-        if (substringPattern.test(src)) {
-            src = src.replace(substringPattern, "");
-        }
-        cleanedSrcLinks.push(src);
+        // Use the regular expression to replace the matched substring with an empty string.
+        const cleanedSrc = src.replace(regexToRemove, "");
+        allLinks.push(cleanedSrc);
     }
 });
 
+// Process links to find unique and duplicate entries
+const uniqueLinks = [...new Set(allLinks)];
+const duplicates = {};
+allLinks.forEach(link => {
+    duplicates[link] = (duplicates[link] || 0) + 1;
+});
+const duplicateLinks = Object.keys(duplicates).filter(link => duplicates[link] > 1);
+
 // Log the cleaned links to the console for verification.
 console.log("Cleaned Image Source Links from Current Page:");
-if (cleanedSrcLinks.length > 0) {
-    cleanedSrcLinks.forEach(link => console.log(link));
+uniqueLinks.forEach(link => console.log(link));
+if (duplicateLinks.length > 0) {
+    console.log("--- Duplicate Links Found ---");
+    duplicateLinks.forEach(link => console.log(`${link} (found ${duplicates[link]} times)`));
+}
 
-    // --- Feature: Copy links to clipboard ---
-    const linksToCopy = cleanedSrcLinks.join('\n');
+if (uniqueLinks.length > 0) {
+    let isAutoCopySuccessful = false;
+    const linksToCopy = uniqueLinks.join('\n');
+
+    // Attempt to automatically copy to clipboard
     const tempTextArea = document.createElement('textarea');
     tempTextArea.value = linksToCopy;
     tempTextArea.style.position = 'fixed';
@@ -180,158 +229,525 @@ if (cleanedSrcLinks.length > 0) {
     tempTextArea.focus();
     tempTextArea.select();
     try {
-        const successful = document.execCommand('copy');
-        const msg = successful ? 'successfully' : 'unsuccessfully';
-        console.log(`Links copied to clipboard ${msg}!`);
+        document.execCommand('copy');
+        isAutoCopySuccessful = true;
+        console.log('Unique links copied to clipboard automatically!');
     } catch (err) {
-        console.error('Oops, unable to copy links to clipboard:', err);
-        console.log('You can manually copy the links from the console output above.');
+        isAutoCopySuccessful = false;
+        console.error('Automatic copy failed:', err);
     } finally {
         document.body.removeChild(tempTextArea);
     }
+    
+    // --- Feature: Create a popup to display links and status ---
+    const popupContainer = document.createElement('div');
+    popupContainer.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        border: 2px solid #333;
+        padding: 20px;
+        z-index: 10000;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        border-radius: 8px;
+        width: 80%;
+        max-width: 600px;
+        font-family: sans-serif;
+    `;
 
+    const popupTitle = document.createElement('h3');
+    popupTitle.textContent = `Found ${uniqueLinks.length} Unique Image Links`;
+    popupTitle.style.cssText = `
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: #333;
+    `;
+
+    const linksTextArea = document.createElement('textarea');
+    linksTextArea.value = uniqueLinks.join('\n');
+    linksTextArea.style.cssText = `
+        width: 100%;
+        height: 200px;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+    `;
+    linksTextArea.readOnly = true;
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    `;
+    
+    const leftSideContainer = document.createElement('div');
+    leftSideContainer.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+
+    const copyButton = document.createElement('button');
+    copyButton.textContent = 'Click to Copy Unique Links';
+    copyButton.style.cssText = `
+        padding: 10px 20px;
+        background-color: #34d399;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: ${isAutoCopySuccessful ? 'none' : 'inline-block'};
+    `;
+
+    const statusMessage = document.createElement('p');
+    statusMessage.style.cssText = `
+        margin: 0;
+        font-weight: bold;
+    `;
+    if (isAutoCopySuccessful) {
+        statusMessage.textContent = 'Unique links copied to clipboard successfully!';
+        statusMessage.style.color = '#10b981';
+    } else {
+        statusMessage.textContent = 'Automatic copy failed. Please use the button below.';
+        statusMessage.style.color = '#ef4444';
+    }
+
+    const countdownMessage = document.createElement('p');
+    countdownMessage.style.cssText = `
+        margin: 0;
+        font-weight: bold;
+        color: #dc3545;
+    `;
+
+    leftSideContainer.appendChild(copyButton);
+    leftSideContainer.appendChild(statusMessage);
+    
+    buttonContainer.appendChild(leftSideContainer);
+    buttonContainer.appendChild(countdownMessage);
+
+
+    const duplicateLinksDiv = document.createElement('div');
+    if (duplicateLinks.length > 0) {
+        duplicateLinksDiv.innerHTML = `
+            <h4>Found ${duplicateLinks.length} Duplicate Links:</h4>
+            <ul style="margin: 0; padding: 0 20px;">
+                ${duplicateLinks.map(link => `<li>${link} (x${duplicates[link]})</li>`).join('')}
+            </ul>
+        `;
+        duplicateLinksDiv.style.cssText = `
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8d7da;
+            border-radius: 5px;
+            color: #721c24;
+            font-size: 14px;
+        `;
+    }
+
+    popupContainer.appendChild(popupTitle);
+    popupContainer.appendChild(linksTextArea);
+    popupContainer.appendChild(buttonContainer);
+    if (duplicateLinks.length > 0) {
+        popupContainer.appendChild(duplicateLinksDiv);
+    }
+    document.body.appendChild(popupContainer);
+    
+    let seconds = 5;
+    countdownMessage.textContent = `Closing in ${seconds} seconds...`;
+    const countdownTimer = setInterval(() => {
+        seconds--;
+        if (seconds > 0) {
+            countdownMessage.textContent = `Closing in ${seconds} seconds...`;
+        } else {
+            clearInterval(countdownTimer);
+            if (document.body.contains(popupContainer)) {
+                document.body.removeChild(popupContainer);
+            }
+        }
+    }, 1000);
+
+    copyButton.addEventListener('click', () => {
+        linksTextArea.select();
+        try {
+            document.execCommand('copy');
+            statusMessage.textContent = 'Unique links copied to clipboard successfully!';
+            statusMessage.style.color = '#10b981';
+            copyButton.style.display = 'none';
+        } catch (err) {
+            statusMessage.textContent = 'Failed to copy. Please copy manually from the box above.';
+            statusMessage.style.color = '#ef4444';
+            console.error('Copy failed:', err);
+        }
+    });
 } else {
     console.log("No matching image links found with the specified pattern.");
 }
-</div>
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Script 2: For Product Detail Image</h3>
-                    <div class="code-block mb-8">
-                        <button class="copy-button" data-target="code-snippet-v1">Copy Code</button>
-                        <pre><code id="code-snippet-v1" class="language-javascript">// This script is now dynamic, allowing you to specify the container for the images.
-// This makes it adaptable to different pages on the same website with similar structures.
+                        </code>
+                    </pre>
+                    <button class="copy-button" onclick="copyCode('code-snippet-1')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                        <span>Copy Code</span>
+                    </button>
+                    <div id="copy-message-1" class="copied-message">Copied!</div>
+                </div>
+                <button id="toggle-button-1" class="mt-2 text-center text-emerald-600 hover:text-emerald-500 font-medium w-full" onclick="toggleCode('code-snippet-1', 'toggle-button-1')">Show More</button>
 
-// The CSS selector for the image container is now hard-coded to 'module_product_detail'.
-// This removes the need for a user prompt.
-const selector = '#module_product_detail';
+                <!-- Script 2 -->
+                <h3 class="text-xl font-semibold text-gray-700 mb-2 mt-8">Script 2: For Product Details</h3>
+                <div class="code-container bg-gray-900 text-white rounded-lg overflow-hidden relative shadow-lg">
+                    <pre id="code-snippet-2" class="p-4 overflow-x-auto text-sm text-gray-200 code-block">
+                        <code>
+// This script is more dynamic and is used for fetching images from a product detail section.
+// It first locates a specific container by its ID and then processes the image links within it.
+const container = document.getElementById('module_product_detail');
+const imgElements = container ? container.querySelectorAll('img') : [];
 
-// Select the main container for the product description using the provided selector.
-const container = document.querySelector(selector);
+const allLinks = [];
 
-if (container) {
-    // Find all <img> tags within the container.
-    const imgElements = container.querySelectorAll('img');
-    const cleanedSrcLinks = [];
+// A dynamic regular expression is used to remove a specific part of the URL,
+// making it more robust for different websites.
+const regexToRemove = /_\d+x\d+q\d+\.(jpg|png|gif|webp)_\.webp/g;
 
-    // Define a regular expression to find and remove the dynamic part of the URL,
-    // like "_2200x2200q80.jpg_.webp" or similar variations.
-    // The regex is now updated to handle both .jpg and .png file extensions.
-    const regexToRemove = /_\d+x\d+q\d+\.(jpg|png)_\.webp/g;
+// Iterate over each img element to extract and clean its src or data-src attribute.
+imgElements.forEach(img => {
+    let src = img.getAttribute('src') || img.getAttribute('data-src');
+    if (src) {
+        // Use the regular expression to replace the matched substring with an empty string.
+        const cleanedSrc = src.replace(regexToRemove, "");
+        allLinks.push(cleanedSrc);
+    }
+});
 
-    // Iterate over each img element to extract and clean its src attribute.
-    imgElements.forEach(img => {
-        let src = img.getAttribute('src');
-        if (src) {
-            // Use the regular expression to replace the matched substring with an empty string.
-            // This makes the script dynamic and adaptable to different image sizes/qualities.
-            const cleanedSrc = src.replace(regexToRemove, "");
-            cleanedSrcLinks.push(cleanedSrc);
-        }
-    });
+// Process links to find unique and duplicate entries
+const uniqueLinks = [...new Set(allLinks)];
+const duplicates = {};
+allLinks.forEach(link => {
+    duplicates[link] = (duplicates[link] || 0) + 1;
+});
+const duplicateLinks = Object.keys(duplicates).filter(link => duplicates[link] > 1);
 
-    // Log the cleaned links to the console for verification.
-    console.log("Cleaned Image Links from Product Details:");
-    if (cleanedSrcLinks.length > 0) {
-        cleanedSrcLinks.forEach(link => console.log(link));
+// Log the cleaned links to the console for verification.
+console.log("Cleaned Image Source Links from Product Details Section:");
+uniqueLinks.forEach(link => console.log(link));
+if (duplicateLinks.length > 0) {
+    console.log("--- Duplicate Links Found ---");
+    duplicateLinks.forEach(link => console.log(`${link} (found ${duplicates[link]} times)`));
+}
 
-        // --- Feature: Copy links to clipboard using modern API ---
-        const linksToCopy = cleanedSrcLinks.join('\n');
-        
-        // Use the modern clipboard API for more reliable copying.
-        // It's wrapped in an async function to handle the promise.
-        const copyToClipboard = async (text) => {
-            try {
-                await navigator.clipboard.writeText(text);
-                console.log('Links successfully copied to clipboard!');
-            } catch (err) {
-                console.error('Failed to copy links to clipboard:', err);
-                // Fallback for older browsers or if permission is denied.
-                const tempTextArea = document.createElement('textarea');
-                tempTextArea.value = text;
-                tempTextArea.style.position = 'fixed';
-                tempTextArea.style.left = '-9999px';
-                document.body.appendChild(tempTextArea);
-                tempTextArea.focus();
-                tempTextArea.select();
-                try {
-                    const successful = document.execCommand('copy');
-                    const msg = successful ? 'successfully' : 'unsuccessfully';
-                    console.log(`Links copied to clipboard ${msg} using fallback!`);
-                } catch (fallbackErr) {
-                    console.error('Oops, unable to copy links to clipboard with fallback:', fallbackErr);
-                    console.log('You can manually copy the links from the console output above.');
-                } finally {
-                    document.body.removeChild(tempTextArea);
-                }
-            }
-        };
+if (uniqueLinks.length > 0) {
+    let isAutoCopySuccessful = false;
+    const linksToCopy = uniqueLinks.join('\n');
 
-        copyToClipboard(linksToCopy);
+    // Attempt to automatically copy to clipboard
+    const tempTextArea = document.createElement('textarea');
+    tempTextArea.value = linksToCopy;
+    tempTextArea.style.position = 'fixed';
+    tempTextArea.style.left = '-9999px';
+    document.body.appendChild(tempTextArea);
+    tempTextArea.focus();
+    tempTextArea.select();
+    try {
+        document.execCommand('copy');
+        isAutoCopySuccessful = true;
+        console.log('Unique links copied to clipboard automatically!');
+    } catch (err) {
+        isAutoCopySuccessful = false;
+        console.error('Automatic copy failed:', err);
+    } finally {
+        document.body.removeChild(tempTextArea);
+    }
+    
+    // --- Feature: Create a popup to display links and status ---
+    const popupContainer = document.createElement('div');
+    popupContainer.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        border: 2px solid #333;
+        padding: 20px;
+        z-index: 10000;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        border-radius: 8px;
+        width: 80%;
+        max-width: 600px;
+        font-family: sans-serif;
+    `;
 
+    const popupTitle = document.createElement('h3');
+    popupTitle.textContent = `Found ${uniqueLinks.length} Unique Image Links`;
+    popupTitle.style.cssText = `
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: #333;
+    `;
+
+    const linksTextArea = document.createElement('textarea');
+    linksTextArea.value = uniqueLinks.join('\n');
+    linksTextArea.style.cssText = `
+        width: 100%;
+        height: 200px;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+    `;
+    linksTextArea.readOnly = true;
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    `;
+    
+    const leftSideContainer = document.createElement('div');
+    leftSideContainer.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+
+    const copyButton = document.createElement('button');
+    copyButton.textContent = 'Click to Copy Unique Links';
+    copyButton.style.cssText = `
+        padding: 10px 20px;
+        background-color: #34d399;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: ${isAutoCopySuccessful ? 'none' : 'inline-block'};
+    `;
+
+    const statusMessage = document.createElement('p');
+    statusMessage.style.cssText = `
+        margin: 0;
+        font-weight: bold;
+    `;
+    if (isAutoCopySuccessful) {
+        statusMessage.textContent = 'Unique links copied to clipboard successfully!';
+        statusMessage.style.color = '#10b981';
     } else {
-        console.log("No matching image links found with the specified pattern.");
+        statusMessage.textContent = 'Automatic copy failed. Please use the button below.';
+        statusMessage.style.color = '#ef4444';
     }
 
+    const countdownMessage = document.createElement('p');
+    countdownMessage.style.cssText = `
+        margin: 0;
+        font-weight: bold;
+        color: #dc3545;
+    `;
+
+    leftSideContainer.appendChild(copyButton);
+    leftSideContainer.appendChild(statusMessage);
+    
+    buttonContainer.appendChild(leftSideContainer);
+    buttonContainer.appendChild(countdownMessage);
+
+
+    const duplicateLinksDiv = document.createElement('div');
+    if (duplicateLinks.length > 0) {
+        duplicateLinksDiv.innerHTML = `
+            <h4>Found ${duplicateLinks.length} Duplicate Links:</h4>
+            <ul style="margin: 0; padding: 0 20px;">
+                ${duplicateLinks.map(link => `<li>${link} (x${duplicates[link]})</li>`).join('')}
+            </ul>
+        `;
+        duplicateLinksDiv.style.cssText = `
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8d7da;
+            border-radius: 5px;
+            color: #721c24;
+            font-size: 14px;
+        `;
+    }
+
+    popupContainer.appendChild(popupTitle);
+    popupContainer.appendChild(linksTextArea);
+    popupContainer.appendChild(buttonContainer);
+    if (duplicateLinks.length > 0) {
+        popupContainer.appendChild(duplicateLinksDiv);
+    }
+    document.body.appendChild(popupContainer);
+    
+    let seconds = 5;
+    countdownMessage.textContent = `Closing in ${seconds} seconds...`;
+    const countdownTimer = setInterval(() => {
+        seconds--;
+        if (seconds > 0) {
+            countdownMessage.textContent = `Closing in ${seconds} seconds...`;
+        } else {
+            clearInterval(countdownTimer);
+            if (document.body.contains(popupContainer)) {
+                document.body.removeChild(popupContainer);
+            }
+        }
+    }, 1000);
+
+    copyButton.addEventListener('click', () => {
+        linksTextArea.select();
+        try {
+            document.execCommand('copy');
+            statusMessage.textContent = 'Unique links copied to clipboard successfully!';
+            statusMessage.style.color = '#10b981';
+            copyButton.style.display = 'none';
+        } catch (err) {
+            statusMessage.textContent = 'Failed to copy. Please copy manually from the box above.';
+            statusMessage.style.color = '#ef4444';
+            console.error('Copy failed:', err);
+        }
+    });
 } else {
-    console.log(`Could not find the '${selector}' container on this page.`);
+    console.log("No matching image links found with the specified pattern.");
 }
-<script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const tabs = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
-            const copyButtons = document.querySelectorAll('.copy-button');
+                        </code>
+                    </pre>
+                    <button class="copy-button" onclick="copyCode('code-snippet-2')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                        <span>Copy Code</span>
+                    </button>
+                    <div id="copy-message-2" class="copied-message">Copied!</div>
+                </div>
+                <button id="toggle-button-2" class="mt-2 text-center text-emerald-600 hover:text-emerald-500 font-medium w-full" onclick="toggleCode('code-snippet-2', 'toggle-button-2')">Show More</button>
+            </section>
+            
+            <!-- Troubleshooting Section -->
+            <section id="troubleshooting-section" class="content-section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Troubleshooting</h2>
+                <p class="text-gray-600 mb-4">If the scripts are still not working, it may be due to recent changes on the website's structure. You can help me diagnose the issue by running the following simple script and sending me the output.</p>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2">How to Get Information for Troubleshooting</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-gray-600">
+                        <li>Open the console on the product page.</li>
+                        <li>Copy and paste the code below and press <kbd class="px-1 py-0.5 bg-gray-200 rounded text-sm font-semibold text-gray-800">Enter</kbd>.</li>
+                        <li>This will output a list of image URLs. Copy the output and send it to me.</li>
+                    </ol>
+                </div>
+                
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Troubleshooting Script</h3>
+                <div class="code-container bg-gray-900 text-white rounded-lg overflow-hidden relative shadow-lg">
+                    <pre id="code-snippet-3" class="p-4 overflow-x-auto text-sm text-gray-200 code-block">
+                        <code>
+// This script finds all image URLs on the page and logs them, which helps in debugging.
+const images = Array.from(document.querySelectorAll('img[src], img[data-src]'));
+const imageSrcs = images.map(img => img.getAttribute('src') || img.getAttribute('data-src'));
 
-            function switchTab(tab) {
-                tabs.forEach(t => {
-                    t.classList.remove('tab-active');
-                    t.classList.add('tab-inactive');
-                    t.setAttribute('aria-selected', 'false');
-                });
-                tab.classList.add('tab-active');
-                tab.classList.remove('tab-inactive');
-                tab.setAttribute('aria-selected', 'true');
+console.log("All Found Image URLs (raw):");
+imageSrcs.forEach(src => console.log(src));
 
-                tabContents.forEach(content => {
-                    content.classList.remove('tab-content-active');
-                });
+                        </code>
+                    </pre>
+                    <button class="copy-button" onclick="copyCode('code-snippet-3')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                        <span>Copy Code</span>
+                    </button>
+                    <div id="copy-message-3" class="copied-message">Copied!</div>
+                </div>
+                <button id="toggle-button-3" class="mt-2 text-center text-emerald-600 hover:text-emerald-500 font-medium w-full" onclick="toggleCode('code-snippet-3', 'toggle-button-3')">Show More</button>
+            </section>
+        </div>
+        
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            &copy; 2025 Daraz Image Link Extractor Scripts. All rights reserved.
+        </footer>
+    </div>
 
-                const activeTabContent = document.getElementById(tab.dataset.tab);
-                if (activeTabContent) {
-                    activeTabContent.classList.add('tab-content-active');
-                }
-            }
+    <!-- Back to Top Button -->
+    <button onclick="scrollToTop()" id="backToTopBtn" class="fixed bottom-4 right-4 bg-emerald-500 text-white p-3 rounded-full shadow-lg hover:bg-emerald-600 transition-opacity duration-300 opacity-0">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+    </button>
 
+    <script>
+        function showTab(tabId) {
+            const contentSections = document.querySelectorAll('.content-section');
+            contentSections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            const tabs = document.querySelectorAll('.tab-button');
             tabs.forEach(tab => {
-                tab.addEventListener('click', () => switchTab(tab));
+                tab.classList.remove('active-tab');
             });
 
-            copyButtons.forEach(copyBtn => {
-                copyBtn.addEventListener('click', () => {
-                    const targetId = copyBtn.dataset.target;
-                    const codeSnippetElement = document.getElementById(targetId);
+            document.getElementById(tabId).classList.add('active');
 
-                    if (codeSnippetElement) {
-                        const codeText = codeSnippetElement.textContent;
-
-                        const tempTextArea = document.createElement('textarea');
-                        tempTextArea.value = codeText;
-                        document.body.appendChild(tempTextArea);
-                        tempTextArea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(tempTextArea);
-
-                        copyBtn.innerText = 'Copied!';
-                        setTimeout(() => {
-                            copyBtn.innerText = 'Copy Code';
-                        }, 2000);
-                    }
-                });
-            });
-
-            // Set the first tab as active by default
-            if (tabs.length > 0) {
-                switchTab(tabs[0]);
+            const tabElement = document.querySelector(`button[id='tab-${tabId.replace('-section', '')}']`);
+            if (tabElement) {
+                tabElement.classList.add('active-tab');
             }
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            showTab('overview-section');
         });
+
+        function copyCode(elementId) {
+            const codeBlock = document.getElementById(elementId);
+            const textToCopy = codeBlock.innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            tempTextArea.style.position = 'fixed';
+            tempTextArea.style.left = '-9999px';
+            document.body.appendChild(tempTextArea);
+            tempTextArea.focus();
+            tempTextArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    const messageElement = document.getElementById(`copy-message-${elementId.slice(-1)}`);
+                    messageElement.style.opacity = 1;
+                    setTimeout(() => {
+                        messageElement.style.opacity = 0;
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        }
+        
+        function toggleCode(codeId, buttonId) {
+            const codeBlock = document.getElementById(codeId);
+            const button = document.getElementById(buttonId);
+
+            if (codeBlock.classList.contains('expanded')) {
+                codeBlock.classList.remove('expanded');
+                button.textContent = 'Show More';
+            } else {
+                codeBlock.classList.add('expanded');
+                button.textContent = 'Show Less';
+            }
+        }
+        
+        const backToTopBtn = document.getElementById('backToTopBtn');
+        window.onscroll = function() {
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                backToTopBtn.style.opacity = 1;
+            } else {
+                backToTopBtn.style.opacity = 0;
+            }
+        };
+        
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
     </script>
 </body>
 </html>
